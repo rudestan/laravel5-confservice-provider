@@ -26,7 +26,7 @@ etc. For example we have 3 environments: dev (local), stage, prod.
 
 The structure of your configuration files in this case should look like:
 
-`
+```
 /config
 	./env
     		./admin
@@ -44,7 +44,7 @@ The structure of your configuration files in this case should look like:
 				stage.php /* for stage environment
 				prod.php /* for prod environment
 				common.php /* common config for all environments of api subproject
-`
+```
 
 In case of command line usage, you should also create configs for CLI:
 
