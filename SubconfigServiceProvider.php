@@ -153,6 +153,10 @@ class SubconfigServiceProvider extends ServiceProvider {
                 $data = $this->_loadConfigFile($elements);
             }
 
+            if(!$data) {
+                continue;
+            }
+
             if(!isset($data['merge_config']) || $data['merge_config'] == false) {
                 $this->_appendWithOverwrite($data);
             } else {
