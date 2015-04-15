@@ -1,6 +1,6 @@
 ##Subconfig Service Provider for Laravel 5
 
-Subconfig Service Provider for Laravel 5 is the class dirved from `Illuminate\Support\ServiceProvider` that 
+Subconfig Service Provider for Laravel 5 is the class derived from `Illuminate\Support\ServiceProvider` that 
 manages your configuration settings and allows you to use separate configuration settings depending on the environment and subproject (subdomain).
 It's main feature is an ability to overwrite or merge the values from your configurations to the main configuration
 tree. So you are able to use custom database settings, view paths, session settings etc. depending on the environment and subproject.
