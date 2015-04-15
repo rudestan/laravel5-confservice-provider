@@ -48,13 +48,13 @@ The structure of your configuration files in this case should look like:
 
 In case of command line usage, you should also create configs for CLI:
 
-`
+```
 			./cli
      			dev.php /* for dev environment
 				stage.php /* for stage environment
 				prod.php /* for prod environment
 				common.php /* common config for all environments of cli subproject
-`
+```
 
 All settings from this files will be loaded to the main tree under key 'env' and Subconfig Service Provider class will automatically
 take the correspondig settings from that tree and apply it to the root.
@@ -132,9 +132,9 @@ There is a config loading order. The keys and values from the previous loaded co
 The loading order is:
 
 0. The creation of main config tree by Laravel. All configs will be loaded to the tree, including your subprojects configs (your subprojects configs will be stored in subkeys eg. 'env' => ['front'...] etc).
-1. Load common config values (file: <root>/config/env/<COMMON>.php)
-2. Load common config for the environment (file: <root>/config/env/<SUB_DOMAIN>/<COMMON>.php)
-3. Load certain config for the subdoman and environment (file: <root>/config/env/<SUB_DOMAIN>/<ENV>.php)
+1. Load common config values (file: &lt;root&gt;/config/env/&lt;COMMON&gt;.php)
+2. Load common config for the environment (file: &lt;root&gt;/config/env/&lt;SUB_DOMAIN&gt;/&lt;COMMON&gt;.php)
+3. Load certain config for the subdoman and environment (file: &lt;root&gt;/config/env/&lt;SUB_DOMAIN&gt;/&lt;ENV&gt;.php)
 
 ###Using cli
 
