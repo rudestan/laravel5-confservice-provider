@@ -147,7 +147,7 @@ use App\Providers\SubconfigServiceProvider;
 
 ...
 
-ConfigServiceProvider::init();
+SubconfigServiceProvider::init();
 
 ```
 
