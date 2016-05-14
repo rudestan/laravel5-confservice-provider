@@ -1,73 +1,65 @@
-<?php namespace App\Providers;
+<?php
+namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-class SubconfigServiceProvider extends ServiceProvider {
+/**
+ * @package SubconfigServiceProvider
+ *
+ * Subconfig service provider could merge values from your custom configuration files
+ * depending on the subproject (subdomain) and on the environment. It
+ * could inject certain config to the root config tree and overwrite
+ * or merge the values.
+ * To set the environment - use the "APP_ENV" variable in .env file.
+ *
+ *
+ * the structure of the config files could for example:
+ *
+ * /config
+ *      ./env
+ *          ./subdomain1
+ *              env1.php /* eg. for dev environment
+ *              env2.php /* eg. for stage environment
+ *              ...
+ *              envN.php /* for N environment
+ *              common.php /* common config for all environments of project on subdomain1
+ *          ./subdoman2
+ *              ...
+ *              envN.php
+ *          ...
+ *          ./subdomainN
+ *          common.php /* common config for all subdomains and all environments
+ */
 
-	/**
-	 * Subconfig service provider could merge values from your custom configuration files
-     * depending on the subproject (subdomain) and on the environment. It
-     * could inject certain config to the root config tree and overwrite
-     * or merge the values.
-     * To set the environment - use the "APP_ENV" variable in .env file.
-     *
-     *
-     * the structure of the config files could for example:
-     *
-     * /config
-     *      ./env
-     *          ./subdomain1
-     *              env1.php /* eg. for dev environment
-     *              env2.php /* eg. for stage environment
-     *              ...
-     *              envN.php /* for N environment
-     *              common.php /* common config for all environments of project on subdomain1
-     *          ./subdoman2
-     *              ...
-     *              envN.php
-     *          ...
-     *          ./subdomainN
-     *          common.php /* common config for all subdomains and all environments
-	 *
-	 * @return void
-	 */
-
-
+class SubconfigServiceProvider extends ServiceProvider
+{
     /**
      * The default project to read the configs in case we could not choose the right one
      */
-
     const DEFAULT_CONFIG_SUBPROJECT = 'front';
-
 
     /**
      * Subdir in your "/config" to store the environment configurations (could be empty)
      */
-
-    const BASE_CONFIG_KEY           = 'env';
-
+    const BASE_CONFIG_KEY = 'env';
 
     /**
      * Default key name for common configurations of the environments and subdomains
      */
-
-    const COMMON_NAME               = 'common';
-
+    const COMMON_NAME = 'common';
 
     /**
      * Extension of configuration files
      */
+    const FILE_EXT = 'php';
 
-    const FILE_EXT                  = 'php';
+    protected $subProject = null;
 
-    private $subProject = null;
-    private $loadingScenario = [];
-
+    protected $loadingScenario = [];
 
     /**
      * Register the Service Provider
      */
-
 	public function register()
 	{
         $this->subProject      = $this->_getSubDomain();
@@ -75,23 +67,21 @@ class SubconfigServiceProvider extends ServiceProvider {
         $this->_loadConfigs();
 	}
 
-
     /**
      * Facade method to register provider eg. from console commands
      */
-
-    public static function init() {
+    public static function init()
+    {
         $instance = new self(app());
         $instance->register();
     }
 
-
     /**
-     * Get the subdomain (the very first part of it) from HTTP_HOST or choose the cli if we are running the cli,
+     * Returns the subdomain (the very first part of it) from HTTP_HOST or choose the cli if we are running the cli,
      * or return the default subproject
+     *
      * @return string
      */
-
     private function _getSubDomain() {
 
         if(php_sapi_name() == 'cli') {
@@ -107,9 +97,8 @@ class SubconfigServiceProvider extends ServiceProvider {
         return self::DEFAULT_CONFIG_SUBPROJECT;
     }
 
-
     /**
-     * Set config loading order
+     * Sets config loading order
      *
      * 1. Load common keys (<BASE_CONFIG_KEY>.<COMMON>)
      * 2. Load common keys for the environment (<BASE_CONFIG_KEY>.<SUB_PROJECT>.<COMMON>)
@@ -117,8 +106,7 @@ class SubconfigServiceProvider extends ServiceProvider {
      *
      * @return array
      */
-
-    private function _generateLoadingScenario() {
+    protected function _generateLoadingScenario() {
         return [
             [
                 self::BASE_CONFIG_KEY,
@@ -137,13 +125,11 @@ class SubconfigServiceProvider extends ServiceProvider {
         ];
     }
 
-
     /**
-     * Load configurations and inject the to the root tree. If there is no configuration by path
-     * from the sceario - try to require the file.
+     * Loads configurations and inject the to the root tree. If there is no configuration by path
+     * from the scenario - try to require the file.
      */
-
-    private function _loadConfigs() {
+    protected function _loadConfigs() {
         foreach($this->loadingScenario as $elements) {
 
             $path = implode(".", $elements);
@@ -165,14 +151,14 @@ class SubconfigServiceProvider extends ServiceProvider {
         }
     }
 
-
     /**
-     * Load configuration file.
-     * @param $parts
+     * Loads configuration file.
+     *
+     * @param array $parts
+     *
      * @return mixed|null
      */
-
-    private function _loadConfigFile($parts) {
+    protected function _loadConfigFile(array $parts) {
         $fullPath = $this->app->configPath()
                         .DIRECTORY_SEPARATOR
                         .implode(DIRECTORY_SEPARATOR, $parts)
@@ -181,38 +167,33 @@ class SubconfigServiceProvider extends ServiceProvider {
 
         return file_exists($fullPath) && is_readable($fullPath) ? require($fullPath) : null;
     }
-
     
     /**
-     * Method adds new config values to the root config tree and overwrites existing ones in case of match
-     * @param $data
+     * Adds new config values to the root config tree and overwrites existing ones in case of match
+     *
+     * @param array $data
      */
-
-    private function _appendWithOverwrite($data) {
+    protected function _appendWithOverwrite(array $data) {
         config($data);
     }
 
-
     /**
-     * Method merges new config values to the root config tree without overwriting.
+     * Merges new config values to the root config tree without overwriting.
      * The value becomes an array if it was not before the merge.
-     * @param $data
+     *
+     * @param array $data
      */
-
-    private function _appendWithMerge($data) {
+    protected function _appendWithMerge(array $data) {
         unset($data['merge_config']);
 
-        $config = app('config');
-
+        $config    = app('config');
         $flatArray = $this->_doubleLeveledArray($data);
 
         foreach($flatArray as $k => $v) {
-
             $existingElement = $config->get($k);
             if(!$existingElement) {
                 $config->set($k, $v);
             } else {
-
                 if(!is_array($existingElement)) {
                     $existingElement = [$existingElement];
                 }
@@ -222,13 +203,14 @@ class SubconfigServiceProvider extends ServiceProvider {
                 } else {
                     $existingElement = array_merge($existingElement, $v);
                 }
+
                 $config->set($k, $existingElement);
             }
         }
     }
 
     /**
-     * Builds the double leveled array of values from the multileveled.
+     * Builds double leveled array of values from multi-leveled.
      * E.g.:
      *
      * k1.k2.k3 => v1
@@ -238,13 +220,14 @@ class SubconfigServiceProvider extends ServiceProvider {
      *              ...
      *              vn]
      *
-     * @param $arr
+     * @param array $arr
+     *
      * @return array
      */
-
-    private function _doubleLeveledArray($arr) {
+    protected function _doubleLeveledArray(array $arr) {
         $recursiveIterator = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($arr));
-        $result = [];
+        $result            = [];
+
         foreach ($recursiveIterator as $leafValue) {
             $keys = [];
             foreach (range(0, $recursiveIterator->getDepth()) as $depth) {
@@ -263,7 +246,7 @@ class SubconfigServiceProvider extends ServiceProvider {
                 $result[$key] = $leafValue;
             }
         }
+
         return $result;
     }
-
 }
